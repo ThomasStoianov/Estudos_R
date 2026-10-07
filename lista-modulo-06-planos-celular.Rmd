@@ -1,0 +1,156 @@
+---
+title: "Lista de Exercicios - Modulo 6: Comparando Planos de Celular"
+output: html_document
+description: "Tarefa avaliativa do Modulo 6: aplicar curve()/stat_function, sobreposicao de curvas e anotacao de graficos em um problema novo de comparacao de planos de celular."
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(ggplot2)
+```
+
+## Contexto
+
+Uma operadora de celular oferece três planos com preços diferentes por
+gigabyte (GB) consumido no mês. Você vai usar visualização de funções
+(`ggplot2` com `stat_function()`, sobreposição de curvas, anotações) para
+comparar os planos e recomendar qual escolher, dependendo do consumo do
+cliente. Use **só** o que vimos no Módulo 6.
+
+
+## Os planos
+
+- **Plano A:** mensalidade de R\$ 29,90 + R\$ 4,00 por GB consumido
+- **Plano B:** mensalidade de R\$ 49,90 + R\$ 2,00 por GB consumido
+- **Plano C:** pré-pago, sem mensalidade, R\$ 8,00 por GB consumido
+
+## Tarefas
+
+```{r resolucao}
+# 1. Escreva tres funcoes em R: custo_plano_a(gb), custo_plano_b(gb) e
+#    custo_plano_c(gb), cada uma calculando o custo mensal total para um
+#    consumo de "gb" gigabytes, de acordo com a regra de cada plano.
+
+custo_plano_a <- function(gb) {
+  return(29.90 + (gb * 4))
+}
+
+custo_plano_a(12)
+
+custo_plano_b <- function(gb) {
+  return(49.90 + (gb * 2))
+}
+
+custo_plano_b(12)
+
+custo_plano_c <- function(gb) {
+  return(8 * gb)
+}
+
+custo_plano_c(12)
+
+# 2. Usando ggplot2 e stat_function() (uma chamada para cada plano, como
+#    vimos na aula), plote as tres funcoes de custo juntas, para um
+#    consumo de 0 a 15 GB. Inclua legenda identificando cada plano, e
+#    titulos de eixo adequados (eixo X: GB consumidos; eixo Y: custo em
+#    reais).
+
+ggplot() +
+  stat_function(
+    fun = custo_plano_a,
+    aes(color = "Plano A"),
+    xlim = c(0, 15)
+  ) +
+  stat_function(
+    fun = custo_plano_b,
+    aes(color = "Plano B"),
+    xlim = c(0, 15)
+  ) +
+  stat_function(
+    fun = custo_plano_c,
+    aes(color = "Plano C"),
+    xlim = c(0, 15)
+  ) +
+  geom_vline(xintercept = 10, linetype = "dashed") +
+  geom_vline(xintercept = 7.475, linetype = "dashed") +
+  geom_vline(xintercept = 8.3167, linetype = "dashed") +
+  labs(
+    x = "GB consumidos",
+    y = "Custo em reais",
+    color = "Plano"
+  )
+
+
+# 3. Calcule (a mao, ou usando R como calculadora) os TRES pontos onde
+#    cada par de planos se cruza (A com B, A com C, B com C) -- ou seja,
+#    o consumo em GB onde os dois custos ficam iguais. Dica: iguale as
+#    duas formulas e resolva a equacao (sao equacoes lineares simples).
+
+# A × B
+# 29,90 + 4x = 49,90 + 2x
+# 
+# 2x = 20
+# 
+# x = 10
+# 
+# 10 GB
+# 
+# A × C
+# 29,90 + 4x = 8x
+# 
+# 29,90 = 4x
+# 
+# x = 7,475
+# 
+# 7,475 GB ≈ 7,48 GB
+# 
+# B × C
+# 49,90 + 2x = 8x
+# 
+# 49,90 = 6x
+# 
+# x = 8,3166...
+# 
+# 8,3167 GB ≈ 8,32 GB
+
+
+# 4. Adicione ao grafico do item 2 uma linha vertical tracejada
+#    (geom_vline()) em cada um dos tres pontos de cruzamento que voce
+#    calculou.
+
+
+# 5. A partir do grafico (com as linhas de cruzamento), determine: para
+#    QUE FAIXA de consumo (em GB) cada plano e o MAIS BARATO dos tres?
+#    Escreva sua resposta como texto (ex: "de 0 a X GB, o plano tal e o
+#    mais barato; de X a Y, ...").
+
+# De 0 a 7,475 GB, o Plano C é o mais barato; de 7,475 a 10 GB, o Plano A é o mais barato; acima de 10 GB, o Plano B é o mais barato.
+
+
+# 6. Um cliente consome em media 6 GB por mes. Qual plano ele deveria
+#    escolher, segundo sua analise? E um cliente que consome 12 GB por
+#    mes?
+
+# Para um cliente que consome em média 6 GB, o plano mais adequado é o plano C, que pra ele
+# vai custar R$: 48,00
+# Para o cliente que consome em média 12 GB, o plano mais adequado é o plano B, que para ele
+# vai custar  R$: 73,90
+```
+
+## Desafio extra (opcional)
+
+A operadora está considerando reduzir a mensalidade do Plano B para
+R\$ 45,00 (mantendo R\$ 2,00 por GB). Recalcule o ponto de cruzamento entre
+A e B com esse novo valor, e refaça o gráfico do item 2 com essa mudança.
+O plano B fica mais vantajoso para uma faixa maior ou menor de consumo do
+que antes?
+
+## Critérios de entrega
+
+- Envie o arquivo `.R` ou `.Rmd` com o gráfico principal (item 2/4) e as
+  respostas dos itens 3, 5 e 6.
+- O gráfico deve ter legenda, título dos eixos, e as três linhas verticais
+  de cruzamento -- um gráfico sem essas anotações não permite responder o
+  item 5 com confiança visual.
+- A resposta do item 5 deve citar os valores numéricos dos pontos de
+  cruzamento, não só descrever "no começo", "no meio", "no final".

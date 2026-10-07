@@ -1,0 +1,114 @@
+---
+title: "Lista de Exercicios - Modulo 2: Analise de Consumo de Energia Eletrica"
+output: html_document
+description: "Tarefa avaliativa do Modulo 2: aplicar vetores, indexacao, indexacao logica e operacoes vetorizadas em um problema novo de consumo de energia eletrica."
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, eval = FALSE)
+```
+
+## Contexto
+
+Você vai analisar o consumo de energia elétrica de uma casa ao longo de um
+ano, usando **só** o que vimos no Módulo 2: criação de vetores, indexação
+(incluindo índices negativos), indexação lógica e operações vetorizadas.
+Não use `if`/`else`, loops, ou `data.frame` -- isso vem em módulos futuros.
+
+**Tempo estimado:** cerca de 1 hora.
+
+## Os dados
+
+```{r dados}
+meses <- c("Jan", "Fev", "Mar", "Abr", "Mai", "Jun",
+           "Jul", "Ago", "Set", "Out", "Nov", "Dez")
+
+consumo_kwh <- c(320, 300, 290, 250, 220, 200, 210, 230, 240, 260, 280, 310)
+
+preco_kwh <- 0.85       # reais por kWh
+teto_conta_mensal <- 220 # reais -- acima disso, a conta "pesa no bolso"
+```
+
+## Tarefas
+
+```{r resolucao}
+# 1. Calcule o consumo TOTAL do ano (some todo o vetor consumo_kwh).
+consumo_total <- sum(consumo_kwh)
+print(consumo_total)
+
+
+# 2. Calcule o consumo MEDIO mensal.
+consumo_medio_mensal <- mean(consumo_kwh)
+print(round(consumo_medio_mensal, 2))
+
+
+# 3. Descubra o valor do MAIOR e do MENOR consumo mensal (max/min).
+maior_valor <- max(consumo_kwh)
+print(maior_valor)
+
+menor_valor <- min(consumo_kwh)
+print(menor_valor)
+
+
+# 4. Descubra em QUAL MES ocorreu o maior consumo, e em qual ocorreu o
+#    menor. Sua resposta deve ser o NOME do mes (ex: "Jan"), nao a
+#    posicao numerica. Dica: combine which() (ou which.max/which.min)
+#    com indexacao do vetor "meses".
+
+meses[which.max(consumo_kwh)]
+
+meses[which.min(consumo_kwh)]
+
+
+# 5. Crie um vetor "custo_mensal" com o custo em reais de cada mes,
+#    multiplicando consumo_kwh pelo preco por kWh -- em uma unica
+#    operacao vetorizada (sem loop).
+
+custo_mensal <- consumo_kwh * preco_kwh
+print(custo_mensal)
+
+
+# 6. Calcule o custo TOTAL do ano.
+custo_total <- sum(custo_mensal)
+print(custo_total)
+
+# 7. Conte quantos meses tiveram custo ACIMA do teto de R$ 220 (dica: some
+#    um vetor logico, igual voces fizeram no Modulo 2 com as notas).
+
+sum(custo_mensal > teto_conta_mensal)
+
+
+# 8. Extraia os NOMES dos meses que ultrapassaram o teto (nao so a
+#    contagem do item anterior, mas quais meses especificamente).
+
+meses[which(custo_mensal > teto_conta_mensal)]
+
+
+# 9. Calcule a VARIACAO de consumo de um mes para o proximo (ou seja,
+#    quanto o consumo subiu ou desceu em relacao ao mes anterior). Dica:
+#    subtraia o vetor "sem o ultimo elemento" do vetor "sem o primeiro
+#    elemento", usando indexacao negativa (consumo_kwh[-1] e
+#    consumo_kwh[-12]). O resultado deve ter 11 valores (nao ha variacao
+#    para o mes de Janeiro, que nao tem mes anterior no ano).
+
+variacao <- consumo_kwh[-1] - consumo_kwh[-12]
+print(variacao)
+
+# 10. A partir do vetor de variacoes do item anterior, descubra em qual
+#     mes ocorreu o MAIOR AUMENTO de consumo em relacao ao mes anterior.
+#     Cuidado: a posicao nesse vetor de variacoes esta "deslocada" em
+#     relacao ao vetor de meses original -- pense em como ajustar isso.
+
+mes_maior_aumento <- meses[which.max(variacao) + 1]
+mes_maior_aumento
+
+```
+
+## Critérios de entrega
+
+- Envie o arquivo `.R` ou `.Rmd` com todo o código rodando sem erro.
+- Todos os cálculos devem usar operações vetorizadas ou funções como
+  `sum()`, `mean()`, `max()`, `min()`, `which()` -- **nenhum** `for`/`while`
+  é necessário (nem esperado) para resolver esta lista.
+- Os itens 4, 8 e 10 pedem **nomes de meses**, não só números -- confira se
+  sua resposta realmente retorna texto, não só a posição.

@@ -1,0 +1,175 @@
+---
+title: "Lista de Exercicios - Simulador de Investimento com Juros Compostos"
+output: html_document
+description: "Aplicar funcoes proprias, if/else e loops (for/while) em um problema novo de simulacao financeira."
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Contexto
+
+Um banco oferece um investimento com uma regra especial: enquanto o saldo
+estiver abaixo de um certo limite, o rendimento mensal é uma taxa "padrão";
+assim que o saldo atinge esse limite, o rendimento passa a ser uma taxa
+"bônus" (mais alta) para todos os meses seguintes. Você vai simular esse
+investimento mês a mês, usando **só** o que vimos no Módulo 4: funções
+próprias, `if`/`else` e loops (`for`/`while`). Não use vetorização "de
+uma vez só" nos itens que pedem simulação -- a ideia é praticar a
+construção do processo passo a passo, mês a mês.
+
+**Tempo estimado:** cerca de 1 hora.
+
+## Tarefas
+
+```{r resolucao}
+# 1. Escreva uma funcao chamada taxa_do_mes(saldo, limite_bonus,
+#    taxa_padrao, taxa_bonus) que usa if/else: retorna taxa_bonus se
+#    saldo for MAIOR OU IGUAL a limite_bonus, e taxa_padrao caso
+#    contrario.
+
+taxa_do_mes <- function(saldo, limite_bonus, taxa_padrao, taxa_bonus) {
+  if (saldo >= limite_bonus) {
+    return(taxa_bonus)
+  } 
+  else {
+    return(taxa_padrao)
+  }
+}
+
+taxa_do_mes(4000, 200, 3500, 500)
+
+
+# 2. Escreva uma funcao chamada simular_investimento(valor_inicial, meses,
+#    limite_bonus, taxa_padrao, taxa_bonus) que:
+#    - comeca com saldo = valor_inicial
+#    - repete, uma vez para cada mes (use for): descobre a taxa do mes
+#      (chamando a funcao do item 1) e atualiza o saldo somando o
+#      rendimento (saldo = saldo * (1 + taxa))
+#    - ao final, retorna o SALDO FINAL apos todos os meses
+
+simular_investimento <- function(valor_inicial, meses, limite_bonus, taxa_padrao, taxa_bonus) {
+  saldo <- valor_inicial
+  
+  for (mes in 1:meses) {
+    
+    taxa <- taxa_do_mes(saldo, limite_bonus, taxa_padrao, taxa_bonus)
+    
+    saldo <- saldo * (1 + taxa)
+  }
+  
+  return(saldo)
+  
+}
+
+simular_investimento(1000, 3, 1500, 0.02, 0.05)
+
+# 3. Teste sua funcao com: valor_inicial = 1000, meses = 24,
+#    limite_bonus = 1200, taxa_padrao = 0.01 (1% ao mes), taxa_bonus =
+#    0.02 (2% ao mes). Qual o saldo final apos os 24 meses?
+
+simular_investimento(1000, 24, 1200, 0.01, 0.02)
+
+
+# 4. Modifique (ou crie uma nova versao de) simular_investimento para que
+#    ela retorne, alem do saldo final, um VETOR com o saldo ao final de
+#    CADA mes (incluindo o mes 0, o valor inicial) -- ou seja, um
+#    historico com 25 valores para o teste do item 3. Dica: crie um vetor
+#    vazio ou pre-alocado antes do loop, e va preenchendo a cada
+#    iteracao.
+
+simular_investimento <- function(valor_inicial, meses, limite_bonus, taxa_padrao, taxa_bonus) {
+  saldo <- valor_inicial
+  saldo_final_mes <- c()
+  
+  for (mes in 1:meses) {
+    
+    taxa <- taxa_do_mes(saldo, limite_bonus, taxa_padrao, taxa_bonus)
+    
+    saldo <- saldo * (1 + taxa)
+    
+    saldo_final_mes <- c(saldo_final_mes, saldo)
+  }
+  return(saldo_final_mes)
+  
+}
+
+simular_investimento(1000, 24, 1500, 0.02, 0.05)
+
+# 5. Usando o vetor de historico do item 4 e o que voces aprenderam no
+#    Modulo 2 (which()), descubra em QUAL MES o saldo atingiu o
+#    limite_bonus pela primeira vez.
+
+resultado <- simular_investimento(1000, 24, 1500, 0.02, 0.05)
+
+posicao <- which(resultado >= 1500)[1]
+
+mes <- posicao - 1
+
+print(mes)
+
+
+# 6. Escreva uma funcao chamada meses_para_dobrar(valor_inicial, taxa) que
+#    usa um loop while para contar quantos meses sao necessarios para o
+#    saldo DOBRAR em relacao ao valor inicial, aplicando a mesma taxa
+#    fixa todo mes (sem regra de bonus aqui -- taxa constante do inicio
+#    ao fim). A funcao deve retornar o numero de meses.
+
+meses_para_dobrar <- function(valor_inicial, taxa) {
+  
+  saldo <- valor_inicial
+  meses <- 0
+  
+  while (saldo < valor_inicial * 2) {
+    
+    saldo <- saldo * (1 + taxa)
+    
+    meses <- meses + 1
+  }
+  
+  return(meses)
+  
+}
+
+meses_para_dobrar(8000, 0.08)
+
+
+# 7. Teste meses_para_dobrar(1000, 0.02) (taxa fixa de 2% ao mes). Quantos
+#    meses sao necessarios?
+
+meses_para_dobrar(1000, 0.02)
+
+
+
+# 8. Existe uma regra pratica de mercado financeiro chamada "regra dos
+#    72": o numero de periodos para dobrar um investimento e
+#    aproximadamente 72 dividido pela taxa em PORCENTAGEM (nao decimal).
+#    Calcule 72 / 2 (para a taxa de 2% do item 7) e compare com o
+#    resultado exato que sua funcao encontrou. Eles sao proximos?
+
+regra <- 72 / 2
+print(regra)
+
+# Sim, os resultados são próximos. A regra dos 72 estimou 36 meses e a função encontrou o 
+# valor exato de acordo com a taxa mensal usada.
+
+
+```
+
+
+## Desafio extra (opcional)
+
+Compare `meses_para_dobrar(1000, 0.01)` com `meses_para_dobrar(1000,
+0.02)`. Dobrar a taxa de juros faz o tempo para dobrar o investimento cair
+pela metade? Use os resultados para responder, e tente explicar o motivo
+com suas próprias palavras.
+
+## Critérios de entrega
+
+- Envie o arquivo `.R` ou `.Rmd` com todo o código rodando sem erro.
+- As funções dos itens 1, 2 (ou 4) e 6 devem ser funções de verdade,
+  reutilizáveis (ou seja, chamáveis com valores diferentes dos exemplos,
+  não só com os números do enunciado "grudados" dentro).
+- O item 4 deve retornar um vetor com 25 valores para o teste do item 3
+  (mês 0 a mês 24).

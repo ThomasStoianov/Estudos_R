@@ -1,0 +1,154 @@
+---
+title: "Lista de Exercicios - Modulo 1: Planejamento Financeiro de uma Viagem"
+output: html_document
+description: "Tarefa avaliativa do Modulo 1: aplicar variaveis, tipos basicos e operacoes aritmeticas em um problema novo de planejamento de orcamento de viagem."
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, eval = FALSE)
+```
+
+## Contexto
+
+Você vai planejar o orçamento de uma viagem fictícia de férias, usando
+**só** o que vimos no Módulo 1: variáveis, tipos básicos, operações
+aritméticas e comentários. Não use `if`/`else`, loops, ou funções próprias
+-- isso vem em módulos futuros. A ideia é resolver um problema real
+combinando vários cálculos simples em sequência, com clareza.
+
+
+## O cenário
+
+Você vai viajar por **10 dias** e tem um orçamento total de **R$ 6.000**.
+Esse orçamento precisa cobrir três categorias de gasto, com a seguinte
+divisão percentual planejada:
+
+- **Hospedagem:** 40% do orçamento total
+- **Alimentação:** 35% do orçamento total
+- **Passeios e lazer:** 25% do orçamento total
+
+Antes de embarcar, você descobre dois gastos fixos que precisam sair do
+orçamento total **antes** da divisão por categoria: um seguro viagem de
+**R$ 180** e uma taxa de bagagem extra de **R$ 120**.
+
+A cotação do dólar no dia do planejamento é de **R$ 5,20** por US$ 1.
+
+## Tarefas
+
+Resolva cada item abaixo criando variáveis com nomes descritivos (em
+português, sem acentos ou espaços) e um comentário explicando o que cada
+bloco de código calcula. Não arredonde valores intermediários -- só
+arredonde (com `round()`) na hora de exibir o resultado final de cada item.
+
+```{r resolucao}
+# 1. Defina as variaveis dadas no enunciado: orcamento total, numero de
+#    dias, os dois gastos fixos, a cotacao do dolar, e os tres percentuais
+#    de categoria (como numeros decimais, ex: 40% = 0.40).
+
+orcamento_total <- 6000
+print(orcamento_total)
+
+numero_dias <- 10
+print(numero_dias)
+
+# gastos fixos
+seguro_viagem <- 180
+print(seguro_viagem)
+
+bagagem_extra <- 120
+print(bagagem_extra)
+
+cotacao_dolar <- 5.20
+print(cotacao_dolar)
+
+perc_hospedagem <- 0.40
+print(perc_hospedagem)
+
+perc_alimentacao <- 0.35
+print(perc_alimentacao)
+
+perc_passeios_lazer <- 0.25
+print(perc_passeios_lazer)
+
+
+# 2. Calcule o orcamento "liquido" (total menos os dois gastos fixos) que
+#    sera de fato dividido entre as categorias.
+
+orcamento_liquido <- orcamento_total - (seguro_viagem - bagagem_extra)
+print(orcamento_liquido)
+
+
+# 3. Calcule quanto sera gasto em cada categoria (hospedagem, alimentacao,
+#    passeios), a partir do orcamento liquido e dos percentuais.
+
+gasto_hospedagem <- orcamento_liquido * perc_hospedagem
+print(gasto_hospedagem)
+
+gasto_alimentacao <- orcamento_liquido * perc_alimentacao
+print(gasto_alimentacao)
+
+gasto_passeio_lazer <- orcamento_liquido * perc_passeios_lazer
+print(gasto_passeio_lazer)
+
+# 4. Calcule o gasto medio permitido POR DIA em cada categoria (o valor da
+#    categoria dividido pelo numero de dias da viagem).
+
+gasto_medio_hospedagem = gasto_hospedagem / numero_dias
+print(gasto_medio_hospedagem)
+
+gasto_medio_alimentacao = gasto_alimentacao / numero_dias
+print(gasto_medio_alimentacao)
+
+gasto_medio_passeio_lazer = gasto_passeio_lazer / numero_dias
+print(gasto_medio_passeio_lazer)
+
+# 5. Converta o orcamento liquido TOTAL e o gasto diario de hospedagem
+#    para dolares, usando a cotacao fornecida.
+
+conversao_orc_liq <- orcamento_liquido / cotacao_dolar
+print(round(conversao_orc_liq,2))
+
+conversao_hospedagem <- gasto_hospedagem / cotacao_dolar
+print(round(conversao_hospedagem,2))
+
+
+# 6. Suponha que voce quer saber se sobra dinheiro: calcule a diferenca
+#    entre o orcamento total original (R$ 6.000) e a soma de TODOS os
+#    gastos (os 2 gastos fixos + as 3 categorias). O resultado deveria dar
+#    proximo de zero -- use isso para conferir se suas contas anteriores
+#    estao corretas.
+
+sobra_dinheiro <- orcamento_total - (seguro_viagem - bagagem_extra) - gasto_hospedagem - gasto_alimentacao - gasto_passeio_lazer
+
+print(sobra_dinheiro)
+
+# 7. Crie uma variavel logica (TRUE/FALSE) que verifica se o gasto diario
+#    de alimentacao (em reais) e menor ou igual a R$ 150. Use um operador
+#    de comparacao (>=, <=, ==, etc).
+
+gasto_medio_alimentacao <- gasto_medio_alimentacao <= 150
+print(gasto_medio_alimentacao)
+
+# 8. Use class() para confirmar o tipo de TRES variaveis diferentes que
+#    voce criou: uma que deveria ser numeric e a variavel logica do item 7.
+
+class(orcamento_total)
+class(gasto_passeio_lazer)
+class(gasto_medio_alimentacao)
+
+```
+
+## Desafio extra (opcional)
+
+Pesquise (ou lembre da aula) a função `paste()` ou `cat()`, e monte uma
+única linha de texto que resuma o resultado final, por exemplo:
+`"O orcamento diario de hospedagem eh de R$ X, ou aproximadamente US$ Y"`.
+Isso não é obrigatório, mas vale a pena experimentar.
+
+## Critérios de entrega
+
+- Envie o arquivo `.R` ou `.Rmd` com todo o código rodando sem erro.
+- Cada bloco numerado (1 a 8) deve ter pelo menos uma linha de comentário
+  explicando o que faz.
+- Os nomes das variáveis devem deixar claro o que cada uma representa
+  (evite nomes como `x1`, `a`, `valor2`).

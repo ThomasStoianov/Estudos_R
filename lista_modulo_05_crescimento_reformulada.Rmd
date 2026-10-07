@@ -1,0 +1,646 @@
+---
+title: "Exercícios - Módulo 5: Crescimento de Investimento e Colônia de Bactérias"
+output: html_document
+description: "Atividade do Módulo 5 sobre bissecção, método de Newton e análise da convergência em problemas de crescimento."
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Contexto
+
+Nesta lista você vai reaproveitar exatamente as funções construídas em
+aula (`raiz_enesima_historico()`, `raiz_newton_historico()`, e o código de
+plotagem do "funil" de convergência) para responder duas perguntas novas,
+de contextos bem diferentes de "calcular raiz quadrada de 2". Copie as
+funções da aula para o topo do seu script antes de começar.
+
+## Parte A: fator de crescimento de um investimento
+
+Um investimento **triplica de valor** depois de exatamente **2**
+aplicações consecutivas de juros (ou seja, se você multiplicar o valor
+inicial pelo fator de crescimento duas vezes, o resultado é o triplo do
+valor original). Você quer descobrir qual é esse fator de crescimento por
+aplicação.
+```{r}
+dobro <- function(x){
+  x*2
+}
+
+
+sinal <- function(x){
+  
+  if(x>0 && (x%%2==1)){
+    return('positivo')
+  }
+  else if (x<0){
+    return('negativo')
+  }
+  'zero'
+}
+
+sinal(1)
+
+
+for (i in 1:5){
+  print(i)
+}
+
+
+fatorial <- function(n){
+  resultado <- 1
+  for (i in 1:n){
+    resultado <- resultado*i
+  }
+  resultado
+}
+
+
+logint <- function(x,base){
+  
+  valor <- 1
+  contador <- 0
+  
+  while(valor<x){
+    valor <- valor*base
+    contador <- contador+1
+  }
+  return(contador)
+}
+
+
+potencia_inteira <- function(base,expoente){
+  if (expoente==0){
+    return(1)
+  }
+  
+  resultado <- 1
+  
+  for (i in 1:expoente){
+    resultado <- resultado*base
+  }
+  
+  return(resultado)
+}
+
+
+raiz_enesima <- function(x,n,tolerancia= 1e-9){
+  limite_inferior <- 0
+  limite_superior <- x
+  
+  while ((limite_superior-limite_inferior)>tolerancia){
+    meio <- (limite_inferior +limite_superior)/2
+    
+    if( potencia_inteira(meio,n)<x){
+      limite_inferior <- meio
+    } else{
+      limite_superior <- meio
+    }
+  }
+  
+  return((limite_inferior+limite_superior)/2)
+}
+
+
+potgeral <- function(base, expoente, precisao=200) {
+  
+  if (expoente==round(expoente)){
+    return(potencia_inteira(base,expoente))
+  }
+  
+  numerador <- round(expoente*precisao)
+  raiz <- raiz_enesima(base,precisao)
+  
+  return(potencia_inteira(raiz,numerador))
+}
+
+
+loggeral <- function(x,base, tolerancia =1e-4){
+  
+  limite_inferior <- 0
+  limite_superior <- 1
+  
+  while (potgeral(base,limite_superior)<x){
+    limite_superior <- limite_superior*2
+  }
+  
+  while ((limite_superior-limite_inferior)>tolerancia){
+    meio <- (limite_superior+limite_inferior)/2
+    
+    if (potgeral(base,meio)<x){
+      limite_inferior <- meio
+    } else{
+      limite_superior <- meio
+    }
+  }
+  
+  return((limite_superior+limite_inferior)/2)
+}
+
+loggeral(128,2)
+
+
+raiz_enesima_historico <- function(x,n,tolerancia= 1e-9){
+  
+  limite_inferior <- 0
+  limite_superior <- x
+  iteracao <- 0
+  
+  historico <- data.frame(
+    iteracao = integer(),
+    inferior = numeric(),
+    superior = numeric()
+  )
+  
+  
+  while ((limite_superior-limite_inferior)>tolerancia){
+    
+    iteracao <- iteracao+1
+    
+    meio <- (limite_inferior +limite_superior)/2
+    
+    historico <- rbind(
+      historico,
+      data.frame(
+        iteracao =iteracao,
+        inferior = limite_inferior,
+        superior= limite_superior
+      )
+    )
+    
+    if( potencia_inteira(meio,n)<x){
+      limite_inferior <- meio
+    } else{
+      limite_superior <- meio
+    }
+  }
+  
+  return(
+    list(
+      raiz=(limite_inferior+limite_superior)/2,
+      historico = historico
+    )
+  )
+}
+
+
+variavel <- raiz_enesima_historico(8,2)
+
+historico <- variavel$historico
+
+plot(
+  NULL, 
+  xlim= c(0,max(historico$superior)),
+  ylim= c(0,max(historico$iteracao)+1),
+  xlab = 'Valor Testado',
+  ylab ='Iteracao',
+  main ='Convergencia da bissecção'
+)
+
+for ( i in 1:nrow(historico)) {
+  
+  segments(
+    historico$inferior[i],
+    historico$iteracao[i],
+    historico$superior[i],
+    historico$iteracao[i],
+    col='steelblue',
+    lwd=3
+  )
+}
+
+abline(
+  v=sqrt(8),
+  col='red'
+)
+
+
+raiz_newton_historico <- function(a, chute_inicial=1, tolerancia =1e-9, max_iter=50){
+  
+  r <- chute_inicial
+  
+  historico <- data.frame(
+    iteracao= integer(),
+    valor = numeric()
+  )
+  
+  for (i in 1:max_iter){
+    
+    historico <- rbind(
+      historico,
+      data.frame(
+        iteracao=i,
+        valor=r
+      )
+    )
+    
+    r_novo <- (r+a/r)/2
+    
+    if (abs(r_novo-r)<tolerancia){
+      
+      r <- r_novo
+      
+      historico <- rbind(
+        historico,
+        data.frame(
+          iteracao=i+1,
+          valor=r
+        )
+      )
+      
+      break
+    }
+    
+    r <- r_novo
+  }
+  
+  list(
+    raiz = r,
+    historico=historico
+  )
+}
+
+
+alvo=200
+
+newton <- raiz_newton_historico(alvo)
+
+bisseccao <- raiz_enesima_historico(alvo,2)
+
+erro_newton <- abs(newton$historico$valor - sqrt(alvo))
+
+erro_bissecao <- abs(
+  (bisseccao$historico$superior-bisseccao$historico$inferior)/2
+)
+
+plot(
+  bisseccao$historico$iteracao,
+  erro_bissecao,
+  type='o',
+  log='y',
+  col='steelblue',
+  pch=16,
+  xlim = c(
+    1,
+    max(
+      length(erro_bissecao),
+      length(erro_newton)
+    )
+  ),
+  ylim = range(
+    c(erro_bissecao,erro_newton)[
+      c(erro_bissecao,erro_newton)>0
+    ]
+  ),
+  xlab= ' iteracao',
+  ylab = 'erro_absoluto (escala_log)'
+)
+
+lines(
+  newton$historico$iteracao,
+  erro_newton,
+  type='o',
+  col= 'darkorange',
+  pch=16
+)
+
+lines(
+  newton$historico$iteracao,
+  erro_newton,
+  type='o',
+  col= 'darkorange',
+  pch=4
+)
+
+
+raiz_digital <- function(n, casas_decimais=7){
+  
+  digitos <- as.integer(
+    strsplit(
+      as.character(
+        format(
+          n*10^(2*casas_decimais),
+          scientific = FALSE
+        )
+      ),
+      ''
+    )[[1]]
+  )
+  
+  print(n*10^(2*casas_decimais))
+  print(digitos)
+  
+  if (length(digitos) %% 2 != 0){
+    digitos <- c(0,digitos)
+  }
+  
+  pares <- list()
+  
+  for (i in seq(1, length(digitos), by=2)){
+    pares[[length(pares)+1]] <- digitos[i]*10+digitos[i+1]
+  }
+  
+  num_digitos_inteiros <- length(pares)
+  
+  raiz <- 0
+  resto <- 0
+  
+  for (par in pares){
+    
+    resto <- resto*100 + par
+    
+    x <- 0
+    
+    for (candidato in 0:9){
+      
+      if ((2*10*raiz + candidato)*candidato <= resto){
+        x <- candidato
+      }
+      
+    }
+    
+    resto <- resto -(20*raiz + x)*x
+    raiz <- raiz*10+x
+  }
+  
+  raiz/(10^casas_decimais)
+}
+
+
+raiz_digital(851927)
+
+
+raiz_digital2 <- function(n, casas_decimais=8){
+  
+  digitos <- as.integer(
+    strsplit(
+      as.character(
+        format(n, scientific = FALSE)
+      ),
+      ''
+    )[[1]]
+  )
+  
+  if (length(digitos) %% 2 != 0){
+    digitos <- c(0,digitos)
+  }
+  
+  pares <- list()
+  
+  for (i in seq(1, length(digitos), by=2)){
+    pares[[length(pares)+1]] <- digitos[i]*10+digitos[i+1]
+  }
+  
+  num_digitos_inteiros <- length(pares)
+  
+  raiz <- 0
+  resto <- 0
+  
+  for (par in pares){
+    
+    resto <- resto*100 + par
+    
+    x <- 0
+    
+    for (candidato in 0:9){
+      
+      if ((2*10*raiz + candidato)*candidato <= resto){
+        x <- candidato
+      }
+      
+    }
+    
+    resto <- resto -(20*raiz + x)*x
+    raiz <- raiz*10+x
+  }
+  
+  raiz
+  
+  for (i in seq_len(casas_decimais)){
+    
+    resto <- 100*resto
+    
+    x <- 0
+    
+    for (candidato in 0:9){
+      
+      if ((2*10*raiz + candidato)*candidato <= resto){
+        x <- candidato
+      }
+      
+    }
+    
+    resto <- resto -(20*raiz + x)*x
+    raiz <- raiz*10+x
+  }
+  
+  raiz/10^casas_decimais
+}
+
+
+raiz_digital2(851927)
+
+
+curve(
+  sin(x),
+  from=-2*pi,
+  to=2*pi,
+  col='steelblue',
+  ylim=c(-1,1)
+)
+
+curve(
+  cos(x),
+  from=-2*pi,
+  to=2*pi,
+  col='orange',
+  ylim=c(-1,1),
+  add=TRUE
+)
+
+
+curve(
+  sin(x),
+  from=-.01,
+  to=.01,
+  col='forestgreen'
+)
+
+curve(
+  1*x,
+  from=-.01,
+  to=.01,
+  col='orange',
+  add=TRUE
+)
+```
+
+```{r parte-a}
+# 1. Determine qual raiz está sendo procurada e indique o grau e o número.
+#    Registre a resposta em comentário antes de resolver.
+```
+
+
+```{r parte-a}
+# O problema corresponde à raiz quadrada de 3.
+# fator^2 = 3
+# fator = sqrt(3)
+# aproximadamente 1,73
+```
+
+
+```{r parte-a}
+# 2. Aplique a função raiz_enesima_historico() para obter o fator de
+#    crescimento por aplicação e armazene o resultado.
+```
+
+
+```{r parte-a}
+resultado_bisseccao <- raiz_enesima_historico(3, 2)
+resultado_bisseccao
+```
+
+
+```{r parte-a}
+# 3. Agora encontre o mesmo fator com raiz_newton_historico() e compare
+#    a quantidade de iterações dos dois métodos.
+``` 
+```{r parte-a}
+resultado_newton <- raiz_newton_historico(3)
+resultado_newton
+nrow(resultado_bisseccao$historico)
+nrow(resultado_newton$historico)
+# O método de Newton chegou ao resultado em 7 iterações,
+# enquanto a bissecção precisou de 32 iterações.
+```
+
+
+```{r parte-a}
+# 4. Gere o gráfico em formato de "funil" mostrando a convergência da
+#    bissecção para o problema do investimento.
+```
+
+
+```{r parte-a}
+dados_bisseccao <- raiz_enesima_historico(3, 2)
+historico <- dados_bisseccao$historico
+plot(NULL, 
+     xlim= c(0,max(historico$superior)),
+     ylim= c(0,max(historico$iteracao)+1),
+     xlab = 'Valor analisado',
+     ylab = 'Iteração',
+     main = 'Convergência da bissecção - Investimento')
+
+for ( i in 1:nrow(historico)) {
+  segments(historico$inferior[i], historico$iteracao[i],
+           historico$superior[i], historico$iteracao[i],
+           col='steelblue', lwd=3)
+}
+abline(v = dados_bisseccao$raiz, col = 'red')
+
+
+```
+
+
+```{r parte-a}
+# 5. Para transformar o fator encontrado em uma taxa percentual, subtraia
+#    1 e multiplique o resultado por 100. Calcule a taxa por aplicação. 
+
+```
+
+```{r}
+taxa_investimento <- (dados_bisseccao$raiz - 1) * 100
+taxa_investimento
+```
+
+
+## Parte B: fator de crescimento de uma colônia de bactérias
+
+Uma colônia de bactérias multiplica seu tamanho por **20 vezes** ao longo
+de **6 horas**, crescendo por um fator constante a cada hora. Você quer
+descobrir esse fator de crescimento por hora.
+
+```{r parte-b}
+# 6. Identifique o grau da raiz e o número que aparece dentro dela.
+
+# É a raiz de sexta ordem do número 20.
+
+
+# 7. Utilize raiz_enesima_historico() para descobrir o fator de crescimento
+#    correspondente a cada hora.
+```
+
+
+```{r parte-b}
+resultado_bacterias <- raiz_enesima_historico(20, 6)
+resultado_bacterias
+```
+
+
+```{r parte-b}
+# 8. Verifique o resultado calculando a sexta potência do fator encontrado
+#    com o operador ^. O valor obtido deve ser próximo de 20.
+```
+
+
+```{r parte-b}
+
+confirmacao <- resultado_bacterias$raiz ^ 6
+confirmacao
+
+
+```
+
+
+```{r parte-b}
+# 9. Faça o gráfico do funil de convergência da bissecção para a colônia.
+```
+
+
+```{r parte-b}
+historico_bacterias <- resultado_bacterias$historico
+plot(NULL, 
+     xlim= c(0,max(historico_bacterias$superior)),
+     ylim= c(0,max(historico_bacterias$iteracao)+1),
+     xlab = 'Valor analisado',
+     ylab = 'Iteração',
+     main = 'Convergência da bissecção - Colônia de Bactérias')
+
+for ( i in 1:nrow(historico_bacterias)) {
+  segments(historico_bacterias$inferior[i], historico_bacterias$iteracao[i],
+           historico_bacterias$superior[i], historico_bacterias$iteracao[i],
+           col='steelblue', lwd=3)
+}
+abline(v = resultado_bacterias$raiz, col = 'red')
+```
+
+
+```{r parte-b}
+# 10. Compare as taxas percentuais da colônia e do investimento. Qual dos
+#     dois apresenta maior crescimento proporcional por período? Justifique
+#     usando os valores calculados, e não apenas a intuição.
+```
+
+
+```{r parte-b}
+taxa_bacterias <- (resultado_bacterias$raiz - 1) * 100
+taxa_investimento
+taxa_bacterias
+taxa_investimento > taxa_bacterias
+# O investimento apresenta aproximadamente 73,20% de crescimento por aplicação,
+# enquanto a colônia apresenta aproximadamente 64,75% por hora.
+# Assim, proporcionalmente ao período, o investimento possui a maior taxa.
+```
+
+
+```{r parte-b}
+
+## Critérios de entrega
+
+- Envie o arquivo `.R` ou `.Rmd`, incluindo as funções copiadas da aula.
+- Os dois gráficos de funil (itens 4 e 9) devem ter título e eixos
+  identificando claramente qual problema cada um representa (não deixe os
+  títulos genéricos de "sqrt(2)").
+- No item 10, a resposta precisa citar os dois números percentuais
+  calculados, não só dizer qual é maior.
